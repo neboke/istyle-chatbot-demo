@@ -1,0 +1,473 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>南国酒家を題材にしたAIコンシェルジュ｜提案デモ</title>
+<style>
+:root{--bg:#f5f2eb;--ink:#243c36;--green:#244d43;--gold:#ac8750;--line:#e0ddd3;--muted:#6f7771}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.8 system-ui,"Yu Gothic",sans-serif}
+button,input,select{font:inherit}
+button,a,input,select{touch-action:manipulation}
+button{cursor:pointer;border:1px solid var(--line);border-radius:8px;background:white;color:var(--ink);padding:9px 14px}
+button:hover{background:#edf1ec}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+a{color:var(--green)}
+header{padding:18px 5%;background:white;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.brand{font:25px Georgia,"Yu Mincho",serif;letter-spacing:3px}
+.brand small{font:10px system-ui;letter-spacing:2px;display:block;margin-top:5px}
+nav{display:flex;gap:7px}
+nav button[aria-pressed="true"]{background:var(--green);color:white}
+.notice{padding:10px 5%;background:#ebe5d8;color:#655c4a;font-size:12px}
+main{max-width:1200px;margin:auto;padding:32px 24px}
+.layout{display:grid;grid-template-columns:1fr 470px;gap:30px;align-items:start}
+.eyebrow{font-size:11px;letter-spacing:3px;color:var(--gold)}
+h1{font-family:"Yu Mincho",Georgia,serif;font-size:clamp(29px,4vw,44px);font-weight:500;line-height:1.5;margin:17px 0}
+h2{font-size:22px;font-weight:500;margin:0 0 12px}
+h3{font-size:16px;margin:0 0 8px}
+p{margin:8px 0 16px}
+.muted{font-size:12px;color:var(--muted)}
+.hero{position:relative;padding:20px 0}
+.ornament{height:110px;display:flex;align-items:center;gap:18px;margin:20px 0}
+.plate{width:105px;height:105px;border-radius:50%;background:#e7e4d8;border:1px solid #cdbb97;box-shadow:inset 0 0 0 10px var(--bg),inset 0 0 0 11px #cdbb97;display:grid;place-items:center;font:36px "Yu Mincho",serif;color:#9c7d4e}
+.ornament span{font-family:"Yu Mincho",serif;letter-spacing:3px}
+.cards{display:grid;gap:12px}
+.card,.panel{background:white;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.card{padding:20px}
+.card-top{display:flex;justify-content:space-between;gap:12px}
+.tag{font-size:10px;background:#eee9dc;color:#796039;padding:3px 8px;border-radius:20px;white-space:nowrap}
+.card p{font-size:13px}
+.card button{font-size:12px;padding:7px 11px}
+.sources{margin-top:20px;padding:18px;border-left:2px solid var(--gold)}
+.sources a{margin-right:12px;font-size:12px}
+.chat{box-shadow:0 18px 50px #21382c12}
+.chat-head{padding:17px 18px;background:var(--green);color:white;display:flex;justify-content:space-between;gap:12px;align-items:center}
+.chat-head strong{font-size:16px}
+.chat-head small{display:block;font-size:10px;opacity:.8}
+.chat-head button{font-size:11px;padding:5px 8px}
+.storebar{padding:10px 15px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;font-size:12px}
+.storebar select{border:1px solid var(--line);border-radius:7px;padding:6px;background:white}
+.messages{height:420px;overflow:auto;padding:18px;background:#fcfbf7;display:flex;flex-direction:column;gap:14px}
+.message{max-width:95%;font-size:13px}
+.message.user{align-self:flex-end}
+.bubble{padding:12px 14px;border-radius:12px;background:#eeeee6;white-space:pre-wrap;overflow-wrap:anywhere}
+.user .bubble{background:#dfece5}
+.message a{font-size:11px;display:inline-block;margin:4px 10px 0 2px}
+.actions{padding:11px;display:flex;flex-wrap:wrap;gap:7px;border-top:1px solid var(--line)}
+.actions button{font-size:12px;padding:7px 10px}
+.composer{padding:11px;display:flex;gap:8px;border-top:1px solid var(--line)}
+.composer input{width:100%;min-width:0;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:13px}
+.primary{background:var(--green);color:white;border-color:var(--green)}
+.primary:hover{background:#326654}
+.footnote{padding:0 14px 13px;font-size:10px;color:var(--muted)}
+.toprow{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin:22px 0}
+.stat{padding:19px;font-size:12px}
+.stat strong{display:block;font-size:28px;font-weight:500;margin-top:6px}
+.section{padding:24px;margin-bottom:20px}
+.columns{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.scroll{max-height:390px;overflow:auto}
+.entry{font-size:12px;padding:13px 0;border-bottom:1px solid var(--line);white-space:pre-wrap;overflow-wrap:anywhere}
+.entry:last-child{border-bottom:0}
+.settings{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.settings label{font-size:12px;color:var(--muted)}
+.settings input{display:block;width:100%;margin-top:5px;padding:8px;border:1px solid var(--line);border-radius:7px}
+.big{font-size:29px;color:var(--green)}
+[hidden]{display:none!important}
+@media(max-width:1000px){.layout{grid-template-columns:1fr}.chat{width:100%;max-width:680px;margin:auto}.cards{grid-template-columns:1fr 1fr}.columns{grid-template-columns:1fr}}
+@media(max-width:580px){main{padding:22px 13px}.cards{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}.settings{grid-template-columns:1fr}.messages{height:390px}.brand{font-size:22px}.section{padding:18px}}
+</style>
+</head>
+<body>
+<header>
+<div class="brand">お食事コンシェルジュ<small>NANGOKUSYUKA / PROPOSAL DEMO</small></div>
+<nav aria-label="画面切替">
+<button id="guestTab" aria-pressed="true">お客様向け体験</button>
+<button id="adminTab" aria-pressed="false">店舗向け管理画面</button>
+</nav>
+</header>
+<div class="notice">
+南国酒家を題材にした非公式の提案用デモです。情報確認日：2026年10月21日。
+予約・通知は実行されません。入力には架空の情報をお使いください。
+</div>
+
+<main>
+<section id="guest">
+<div class="layout">
+<div>
+<div class="hero">
+<div class="eyebrow">DINING & BANQUET CONCIERGE</div>
+<h1>大切な集いに、<br>ちょうどよい一席を。</h1>
+<p>宴会のプラン選びから、お料理のご相談まで。<br>ご希望を伺い、店舗への相談内容をおまとめします。</p>
+<div class="ornament" aria-hidden="true"><div class="plate">宴</div><span>お集まりに、<br>ひとつ先のおもてなし。</span></div>
+</div>
+<div class="cards">
+<article class="card">
+<div class="card-top"><h3>宴会プランを相談</h3><span class="tag">幹事様向け</span></div>
+<p>日程・人数・予算・個室の希望を伺い、プラン候補と確認事項を整理します。</p>
+<button id="banquetStart">宴会の相談を始める</button>
+</article>
+<article class="card">
+<div class="card-top"><h3>おすすめ料理を相談</h3><span class="tag">原宿本店</span></div>
+<p>肉料理、海老料理、取り分ける料理など、お好みに合わせて候補をご案内します。</p>
+<button id="dishStart">料理を相談する</button>
+</article>
+<article class="card">
+<div class="card-top"><h3>予約相談の模擬受付</h3><span class="tag">体験用</span></div>
+<p>ご希望を確認画面にまとめて受付体験。空席確認・予約確定は公式予約先で行います。</p>
+<button id="bookingStart">受付を体験する</button>
+</article>
+<article class="card">
+<div class="card-top"><h3>店舗選び・アクセス</h3><span class="tag">2店舗を収録</span></div>
+<p>原宿本店・飯田橋店を案内。他店舗は公式店舗一覧をご覧いただけます。</p>
+<button id="storesStart">店舗について聞く</button>
+</article>
+</div>
+<div class="sources">
+<h3>情報の出典</h3>
+<a href="https://nangokusyuka.co.jp/store/harajuku.html" target="_blank" rel="noopener noreferrer">原宿本店</a>
+<a href="https://nangokusyuka.co.jp/store/iidabashi.html" target="_blank" rel="noopener noreferrer">飯田橋店</a>
+<a href="https://nangokusyuka.co.jp/store/harajuku/harajuku_course.html" target="_blank" rel="noopener noreferrer">コース案内</a>
+<a href="https://nangokusyuka.co.jp/store/harajuku/harajuku_alacarte.html" target="_blank" rel="noopener noreferrer">料理案内</a>
+<p class="muted">店舗画像・ロゴは使用していません。掲載情報の自動更新は行いません。料金、営業日、提供条件は公式サイト・店舗で最新情報をご確認ください。</p>
+</div>
+</div>
+
+<div class="panel chat">
+<div class="chat-head">
+<div><strong>AIコンシェルジュ 体験</strong><small>登録情報と会話シナリオによるデモ</small></div>
+<button id="restart">新しい会話</button>
+</div>
+<div class="storebar"><label for="shop">相談する店舗</label>
+<select id="shop"><option>原宿本店</option><option>飯田橋店</option></select></div>
+<div class="messages" id="messages" role="log" aria-live="polite"></div>
+<div class="actions" id="actions"></div>
+<form class="composer" id="composer">
+<input id="input" maxlength="500" aria-label="メッセージ" placeholder="例：忘年会を相談したい" autocomplete="off">
+<button class="primary" type="submit">送信</button>
+</form>
+<div class="footnote">空席・予約の確約は行いません。履歴はこのページを開いている間のみ保持します。</div>
+</div>
+</div>
+</section>
+
+<section id="admin" hidden>
+<div class="toprow"><div><div class="eyebrow">MANAGEMENT DEMO</div><h1>相談の内容を、店舗へつなぐ。</h1></div>
+<button id="clear">体験データを消去</button></div>
+<p class="muted">提案用の公開画面です。本番の管理画面には担当者認証を設けます。再読み込みすると体験データは消えます。</p>
+<div class="stats">
+<div class="panel stat">案内・提案件数<strong id="answerCount">0件</strong></div>
+<div class="panel stat">予約相談の模擬受付<strong id="leadCount">0件</strong></div>
+<div class="panel stat">店舗確認の案内<strong id="checkCount">0件</strong></div>
+<div class="panel stat">推定削減時間<strong id="savedTime">0分</strong></div>
+</div>
+<div class="panel section">
+<div class="toprow"><h2>対応時間の削減を試算</h2><button id="sample">月次サンプルを見る</button></div>
+<p class="muted" id="basis"></p>
+<div class="settings">
+<label>人が案内する想定時間（分／件）<input id="minutes" type="number" value="5" min="0" max="120" step="0.5"></label>
+<label>人件費の想定（円／時）<input id="hourly" type="number" value="2400" min="0" max="100000" step="100"></label>
+<label>月額運用費の仮定（円）<input id="monthly" type="number" value="5000" min="0" max="1000000" step="500"></label>
+</div>
+<p style="margin-top:16px">人件費換算：<strong id="gross"></strong><br>運用費差し引き後：<strong class="big" id="net"></strong></p>
+<p class="muted" id="formula"></p>
+<p class="muted">すべて仮定に基づく推計です。聞き取りの各発言、受付、店舗確認は計算対象に含めません。担当者の確認・手戻り等は別途測定が必要です。運用費5,000円は見積額ではありません。</p>
+</div>
+<div class="columns">
+<div class="panel section"><h2>予約相談の受付一覧</h2><div id="leads" class="scroll"></div></div>
+<div class="panel section"><h2>対応履歴</h2><div id="logs" class="scroll"></div></div>
+</div>
+</section>
+</main>
+
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const source={
+ harajuku:["原宿本店の公式案内","https://nangokusyuka.co.jp/store/harajuku.html"],
+ iidabashi:["飯田橋店の公式案内","https://nangokusyuka.co.jp/store/iidabashi.html"],
+ courses:["原宿本店のコース","https://nangokusyuka.co.jp/store/harajuku/harajuku_course.html"],
+ dishes:["原宿本店の料理","https://nangokusyuka.co.jp/store/harajuku/harajuku_alacarte.html"],
+ grand:["原宿本店のメニューPDF","https://nangokusyuka.co.jp/dcms_media/other/HA_grand_260901.pdf"],
+ reserve:["公式予約案内","https://nangokusyuka.co.jp/reservation.html"],
+ stores:["公式店舗一覧","https://nangokusyuka.co.jp/store/"]
+};
+let flow="",fields=[],index=0,draft={},leads=[],logs=[];
+let answers=0,checks=0,serial=1,sample=false;
+const shop=()=>$("shop").value;
+const shopSource=()=>shop()==="原宿本店"?"harajuku":"iidabashi";
+const money=n=>new Intl.NumberFormat("ja-JP",{style:"currency",currency:"JPY",maximumFractionDigits:0}).format(n);
+const clock=()=>new Date().toLocaleTimeString("ja-JP",{timeZone:"Asia/Tokyo",hour:"2-digit",minute:"2-digit"});
+function today(){
+ const p=new Intl.DateTimeFormat("en-US",{timeZone:"Asia/Tokyo",year:"numeric",month:"2-digit",day:"2-digit"}).formatToParts(new Date());
+ const v=t=>p.find(x=>x.type===t).value;
+ return v("year")+"-"+v("month")+"-"+v("day");
+}
+function validDate(s){
+ if(!/^\d{4}-\d{2}-\d{2}$/.test(s))return false;
+ const d=new Date(s+"T00:00:00Z");
+ return Number.isFinite(+d)&&d.toISOString().slice(0,10)===s;
+}
+function party(s){
+ const m=s.normalize("NFKC").trim().match(/^(\d{1,3})\s*(名|人)?$/);
+ return m&&+m[1]>=1&&+m[1]<=200?+m[1]:null;
+}
+function closed(store,date){
+ if(store==="原宿本店")return ["2026-10-26","2026-11-18","2026-12-31"].includes(date);
+ return store==="飯田橋店"&&new Date(date+"T00:00:00Z").getUTCDay()===2;
+}
+function plan(store,date){
+ if(store!=="原宿本店")return "この店舗のプラン条件は未登録です。店舗の公式案内をご確認ください。";
+ if(closed(store,date))return "確認時点の公式案内では休業日です。別日をご相談ください。";
+ if(date>="2026-11-01"&&date<="2026-11-30")return "候補：11月の早忘年会プラン。開催期間には合致します。料金・人数条件・空席は別途確認が必要です。";
+ if(date>="2026-12-01"&&date<="2027-01-11"&&!(date>="2027-01-01"&&date<="2027-01-03"))return "候補：忘新年会プラン。開催期間には合致します。料金・人数条件・空席は別途確認が必要です。";
+ return "登録済みの期間限定プランに合致しません。通常コースや別プランを店舗へ確認するご相談として整理します。";
+}
+function add(who,text,refs=[]){
+ const outer=document.createElement("div");
+ outer.className="message "+(who==="お客様"?"user":"bot");
+ const b=document.createElement("div");b.className="bubble";b.textContent=text;outer.append(b);
+ refs.forEach(k=>{
+  const s=source[k];if(!s)return;
+  const a=document.createElement("a");a.href=s[1];a.textContent=s[0];
+  a.target="_blank";a.rel="noopener noreferrer";outer.append(a);
+ });
+ $("messages").append(outer);$("messages").scrollTop=$("messages").scrollHeight;
+ logs.push({time:clock(),who,text,shop:shop()});renderAdmin();
+}
+const bot=(text,refs=[])=>add("コンシェルジュ",text,refs);
+function buttons(items){
+ $("actions").replaceChildren();
+ items.forEach(([label,fn])=>{
+  const b=document.createElement("button");b.type="button";b.textContent=label;b.onclick=fn;
+  $("actions").append(b);
+ });
+}
+function menu(){
+ buttons([
+ ["宴会を相談",()=>send("宴会を相談")],
+ ["料理を相談",()=>send("料理を相談")],
+ ["予約相談の受付",()=>send("予約相談の受付")],
+ ["店舗を選びたい",()=>send("店舗を選びたい")]
+ ]);
+}
+function intro(){
+ flow="";draft={};$("messages").replaceChildren();
+ bot("ようこそ。南国酒家を題材にした提案用コンシェルジュです。\n\n現在の相談先は「"+shop()+"」です。宴会プラン、お料理、予約相談の受付を体験いただけます。\n\nご希望に近いボタンをお選びください。");
+ menu();
+}
+const f={
+ date:{key:"date",label:"希望日",q:"ご希望日はいつですか？\n2026-12-12 のように入力してください。",choices:["2026-11-14","2026-12-12"]},
+ time:{key:"time",label:"希望時刻",q:"ご希望の時刻を教えてください。",choices:["12:00","18:00","19:00"]},
+ people:{key:"people",label:"人数",q:"何名様でのご利用ですか？",choices:["4名","10名","20名"]},
+ purpose:{key:"purpose",label:"利用目的",q:"お集まりの目的を教えてください。",choices:["忘年会・新年会","接待・会食","家族のお祝い"]},
+ budget:{key:"budget",label:"1名あたりの希望総予算",q:"飲み物・税・サービス料・室料等を含めて、1名あたりの希望予算はいくらですか？\n金額のみ、または「相談したい」と入力してください。",choices:["8000円","10000円","15000円","相談したい"]},
+ room:{key:"room",label:"個室の希望",q:"個室をご希望ですか？",choices:["個室を希望","ホール席でもよい","相談したい"]},
+ drink:{key:"drink",label:"飲み物の希望",q:"飲み放題など、飲み物のご希望はありますか？",choices:["飲み放題を希望","単品で注文","相談したい"]},
+ preference:{key:"preference",label:"料理の好み",q:"どのようなお料理をお探しですか？",choices:["定番の肉料理","海老料理","みんなで取り分ける料理"]},
+ allergy:{key:"allergy",label:"アレルギー等",q:"アレルギーや、避けたい食材はありますか？\n安全な提供が可能かどうかは店舗の確認が必要です。",choices:["申告なし","卵アレルギー","えびアレルギー","店舗へ相談したい"]},
+ name:{key:"name",label:"お名前",q:"デモ用のお名前を入力してください。",choices:["デモ幹事"]},
+ contact:{key:"contact",label:"連絡先",q:"デモ用のメールアドレスを入力してください。実際の送信は行いません。",choices:["demo@example.com"]}
+};
+function begin(type,seed={}){
+ if(flow){bot("いまのご相談を進めるか、「中止してメニューへ」をお選びください。");return}
+ flow=type;draft={...seed};index=0;
+ const keys=type==="banquet"?["date","people","purpose","budget","room","drink"]:
+ type==="dish"?["people","preference","allergy"]:
+ ["date","time","people","purpose","budget","room","allergy","name","contact"];
+ fields=keys.filter(k=>draft[k]===undefined).map(k=>f[k]);
+ ask();
+}
+function ask(){
+ if(index>=fields.length){complete();return}
+ const field=fields[index];
+ bot("ご相談 "+(index+1)+"/"+fields.length+"\n"+field.q);
+ let choices=field.choices;
+ if(field.key==="date")choices=choices.filter(d=>d>=today());
+ buttons([...choices.map(t=>[t,()=>send(t)]),["中止してメニューへ",cancel]]);
+}
+function cancel(){
+ flow="";draft={};bot("今回の聞き取りを中止しました。受付は行っていません。");menu();
+}
+function summary(v){
+ const lines=["店舗："+shop()];
+ ["date","time","people","purpose","budget","room","drink","allergy","name","contact"].forEach(k=>{
+  if(v[k]!==undefined){
+   let value=v[k];
+   if(k==="people")value+="名";
+   if(k==="budget"&&typeof value==="number")value=money(value);
+   lines.push(f[k].label+"："+value);
+  }
+ });
+ return lines.join("\n");
+}
+function complete(){
+ const type=flow;flow="";
+ if(type==="banquet"){
+  answers++;
+  const saved={...draft};
+  let text=summary(saved)+"\n\n"+plan(shop(),saved.date);
+  if(typeof saved.budget==="number")text+="\n\n希望予算の総枠："+money(saved.budget*saved.people)+"\nこれはご希望額の合計で、店舗の見積額ではありません。";
+  text+="\n\n個室・飲み放題・費用総額は店舗確認が必要です。条件に合う空席があることを示すものではありません。";
+  bot(text,[shopSource(),...(shop()==="原宿本店"?["courses"]:[])]);
+  buttons([
+   ["この条件で受付体験",()=>begin("booking",saved)],
+   ["条件を変えて相談",()=>begin("banquet")],
+   ["メニューへ",menu]
+  ]);
+ }else if(type==="dish"){
+  const v={...draft};
+  if(v.allergy!=="申告なし"){
+   checks++;
+   bot("「"+v.allergy+"」として、店舗での確認が必要です。\n\nこのデモには全原材料・調理工程・共通設備の情報がないため、食べられる料理の判断や除去対応の確約は行いません。\n予約相談の内容に記録して、店舗へご確認ください。",[shopSource()]);
+   buttons([["受付体験に進む",()=>begin("booking",{people:v.people,allergy:v.allergy})],["メニューへ",menu]]);
+  }else if(shop()!=="原宿本店"){
+   checks++;
+   bot("飯田橋店の料理詳細は、このデモに未登録です。原宿本店の料理を飯田橋店のメニューとしてご案内することはできません。\n飯田橋店の公式案内でメニューをご確認ください。",["iidabashi"]);
+   menu();
+  }else{
+   answers++;
+   let text;
+   if(/海老|えび|エビ/.test(v.preference)){
+    text="海老料理の候補は「天然海老のチリソース煮」です。海老料理をご希望の方へのご相談候補として挙げています。";
+   }else if(/肉|定番/.test(v.preference)){
+    text="定番の肉料理の候補は「国産 豚肉の広東風酢豚」です。公式サイトで紹介されている料理から選びました。";
+   }else if(/取り分け|みんな/.test(v.preference)){
+    text="取り分けるお食事の相談候補として「国産 豚肉の広東風酢豚」「天然海老のチリソース煮」「香り野菜のあっさり炒め（塩味）」を挙げます。\nこの組み合わせはデモ上の提案で、公式のセット商品ではありません。";
+   }else{
+    text="その好みに合う料理を判断できる情報が不足しています。公式メニューをご覧いただき、店舗へご相談ください。";
+   }
+   bot(v.people+"名様でのご相談ですね。\n\n"+text+"\n\n人数に合う量、辛さ、提供可否、最新価格は店舗にご確認ください。",["dishes","grand"]);
+   buttons([["このまま受付体験",()=>begin("booking",{people:v.people,allergy:v.allergy})],["別の料理を相談",()=>begin("dish")],["メニューへ",menu]]);
+  }
+ }else{
+  flow="review";
+  bot("模擬受付の前に内容をご確認ください。\n\n"+summary(draft)+"\n\n店舗への送信・空席確保・予約確定は行いません。");
+  buttons([["この内容で模擬受付",finish],["最初から修正",()=>{flow="";begin("booking")}],["中止してメニューへ",cancel]]);
+ }
+ renderAdmin();
+}
+function finish(){
+ if(flow!=="review")return;
+ const id="DEMO-"+String(serial++).padStart(3,"0");
+ leads.push({id,shop:shop(),time:clock(),data:{...draft}});
+ flow="";draft={};
+ bot("予約相談の模擬受付が完了しました。\n受付番号："+id+"\n\n店舗への送信は行っていません。実際の空席確認・予約は公式予約先へお進みください。\n\n店舗向け管理画面で、いまの受付内容をご覧いただけます。",["reserve"]);
+ menu();renderAdmin();
+}
+function validate(field,text){
+ const t=text.normalize("NFKC").trim();
+ if(field.key==="date"){
+  if(!validDate(t))return {error:"実在する日付を 2026-12-12 の形式で入力してください。"};
+  if(t<today())return {error:"過去の日付です。本日以降の日付を入力してください。"};
+  if(closed(shop(),t))return {error:"登録時点の公式案内では、その日は休業日に該当します。別日を入力してください。最新の営業状況は店舗にご確認ください。"};
+  return {value:t};
+ }
+ if(field.key==="time"){
+  if(!/^([01]\d|2[0-3]):[0-5]\d$/.test(t))return {error:"18:00 のように時刻を入力してください。"};
+  return {value:t+"（営業・受付可否は要確認）"};
+ }
+ if(field.key==="people"){
+  const n=party(t);return n?{value:n}:{error:"1〜200名の整数で入力してください。受付可能人数を確約するものではありません。"};
+ }
+ if(field.key==="budget"){
+  if(t==="相談したい")return {value:t};
+  const raw=t.replace(/,/g,"").replace(/円$/,"");
+  if(!/^\d{1,6}$/.test(raw)||+raw<1)return {error:"8000円 のように金額を入力するか、「相談したい」を選んでください。"};
+  return {value:+raw};
+ }
+ if(field.key==="contact"&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(t)){
+  return {error:"メールアドレス形式で入力してください。demo@example.com が使えます。"};
+ }
+ return {value:t};
+}
+function send(raw){
+ const t=String(raw).trim();if(!t)return;
+ $("input").value="";add("お客様",t);
+ if(flow==="review"){bot("下のボタンで模擬受付、修正、中止を選んでください。");return}
+ if(flow){
+  const result=validate(fields[index],t);
+  if(result.error){bot(result.error,fields[index].key==="date"?[shopSource()]:[]);return}
+  draft[fields[index].key]=result.value;index++;ask();return;
+ }
+ if(/アレルギー|アレルゲン|除去|食べられる/.test(t)){
+  checks++;
+  bot("食物アレルギーへの対応は、店舗による原材料・調理工程の確認が必要です。このデモでは安全性を判断できません。ご希望店舗へ直接ご確認ください。",[shopSource()]);
+  menu();
+ }else if(/宴会|忘年|新年|個室|接待|コース|プラン/.test(t)){
+  begin("banquet");
+ }else if(/料理|おすすめ|メニュー|酢豚|海老|えび/.test(t)){
+  begin("dish");
+ }else if(/予約|受付/.test(t)){
+  begin("booking");
+ }else if(/店舗|店選|アクセス|場所|原宿|飯田橋/.test(t)){
+  answers++;
+  bot("原宿本店：JR原宿駅東口から徒歩2分。宴会・個室の相談先としてご案内できます。\n\n飯田橋店：ホテルメトロポリタン エドモント地下1階。飯田橋駅・水道橋駅から徒歩約5分です。\n\nチャット上部で相談先の店舗を切り替えられます。他店舗は公式店舗一覧をご覧ください。",["harajuku","iidabashi","stores"]);
+  menu();
+ }else if(/価格|料金|予算|いくら/.test(t)){
+  checks++;
+  bot("料理・プランの価格は、提供期間や条件を含めて公式案内・店舗で確認が必要です。\n宴会相談では、飲み物・税・サービス料・室料等を含めた希望予算を伺い、確認事項として整理します。",shop()==="原宿本店"?["courses","grand"]:["iidabashi"]);
+  menu();
+ }else if(/営業|定休|休業/.test(t)){
+  checks++;
+  bot("営業時間・休業日は変更があるため、選択中の店舗の公式案内をご確認ください。受付体験で指定した時刻も、店舗の対応可否を保証するものではありません。",[shopSource()]);
+  menu();
+ }else{
+  checks++;
+  bot("このデモの登録情報では回答できません。店舗への確認が必要です。\n\n宴会プラン、料理の相談、店舗案内、予約相談の受付を体験いただけます。",[shopSource()]);
+  menu();
+ }
+ renderAdmin();
+}
+function view(admin){
+ $("guest").hidden=admin;$("admin").hidden=!admin;
+ $("guestTab").setAttribute("aria-pressed",String(!admin));
+ $("adminTab").setAttribute("aria-pressed",String(admin));
+ if(admin)renderAdmin();
+}
+function list(id,texts,empty){
+ const el=$(id);el.replaceChildren();
+ if(!texts.length){const p=document.createElement("p");p.className="muted";p.textContent=empty;el.append(p);return}
+ texts.forEach(t=>{const d=document.createElement("div");d.className="entry";d.textContent=t;el.append(d)});
+}
+function num(id,max){
+ const v=Number($(id).value);return Number.isFinite(v)?Math.max(0,Math.min(max,v)):0;
+}
+function renderAdmin(){
+ const mins=num("minutes",120),hourly=num("hourly",100000),cost=num("monthly",1000000);
+ $("answerCount").textContent=answers+"件";$("leadCount").textContent=leads.length+"件";
+ $("checkCount").textContent=checks+"件";$("savedTime").textContent=(Math.round(answers*mins*10)/10)+"分";
+ const count=sample?120:answers,gross=count*mins/60*hourly;
+ $("basis").textContent=sample
+ ?"月次サンプル：月120件の案内を自動化できたと仮定。体験履歴とは別の架空データです。"
+ :"体験データ：いまの案内・提案"+answers+"件を月間件数と仮定して計算しています。";
+ $("sample").textContent=sample?"体験データに戻す":"月次サンプルを見る";
+ $("gross").textContent=money(gross);$("net").textContent=money(gross-cost);
+ $("formula").textContent=count+"件 × "+mins+"分 ÷ 60 × "+money(hourly)+"／時 − 運用費 "+money(cost);
+ list("leads",[...leads].reverse().map(l=>{
+  const lines=[l.id+" ｜ "+l.shop+" ｜ "+l.time+" ｜ 模擬受付"];
+  Object.entries(l.data).forEach(([k,v])=>{if(f[k])lines.push(f[k].label+"："+v)});
+  lines.push("状態：店舗への送信なし・予約未確定");return lines.join("\n");
+ }),"まだ受付はありません。お客様向け画面で受付を体験してください。");
+ list("logs",[...logs].reverse().map(l=>l.time+" ｜ "+l.shop+" ｜ "+l.who+"\n"+l.text),"履歴はありません。");
+}
+$("composer").onsubmit=e=>{e.preventDefault();send($("input").value)};
+$("guestTab").onclick=()=>view(false);
+$("adminTab").onclick=()=>view(true);
+$("restart").onclick=intro;
+$("shop").onchange=()=>{flow="";draft={};bot("相談先を「"+shop()+"」に変更しました。入力中の相談内容はリセットしました。");menu()};
+$("banquetStart").onclick=()=>send("宴会を相談");
+$("dishStart").onclick=()=>send("料理を相談");
+$("bookingStart").onclick=()=>send("予約相談の受付");
+$("storesStart").onclick=()=>send("店舗を選びたい");
+$("sample").onclick=()=>{sample=!sample;renderAdmin()};
+["minutes","hourly","monthly"].forEach(id=>$(id).addEventListener("input",renderAdmin));
+$("clear").onclick=()=>{
+ leads=[];logs=[];answers=0;checks=0;sample=false;
+ flow="";draft={};intro();renderAdmin();
+};
+intro();
+</script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+# ローカルの秘密情報
+.dev.vars*
+.env*
+
+# ローカル開発で生成されるファイル
+node_modules/
+.wrangler/
