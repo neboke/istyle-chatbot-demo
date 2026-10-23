@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Istyle｜インフォメーションセンター体験デモ</title>
+<style>
+:root{--ink:#24332f;--green:#244b40;--cream:#f5f3ed;--line:#dedfd7;--muted:#68746f}
+*{box-sizing:border-box}
+body{margin:0;background:var(--cream);color:var(--ink);font:15px/1.7 system-ui,"Yu Gothic",sans-serif}
+button,input,textarea{font:inherit}
+button{cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid #ca9c56;outline-offset:3px}
+button{border:1px solid var(--line);background:white;color:var(--ink);border-radius:10px;padding:10px 16px}
+button:hover{background:#eef2ed}
+.primary{background:var(--green);color:white;border-color:var(--green)}
+.primary:hover{background:#326451}
+header{background:#fff;border-bottom:1px solid var(--line);padding:18px 5%;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
+.brand{font-family:Georgia,serif;font-size:29px;letter-spacing:3px}
+.brand small{font:11px system-ui;letter-spacing:1px;display:block}
+nav{display:flex;gap:8px}
+nav button[aria-pressed="true"]{background:var(--green);color:white}
+.notice{padding:10px 5%;background:#ebe8dc;font-size:12px;color:#615a47}
+main{max-width:1180px;margin:auto;padding:38px 24px}
+.eyebrow{font-size:11px;letter-spacing:3px;color:var(--muted)}
+h1{font-size:clamp(27px,4vw,44px);line-height:1.4;font-weight:500;margin:14px 0}
+h2{font-size:23px;font-weight:500;margin:0 0 12px}
+h3{font-size:16px;margin:0 0 8px}
+p{margin:8px 0 18px}
+.muted{color:var(--muted);font-size:13px}
+.layout{display:grid;grid-template-columns:1fr 440px;gap:32px;align-items:start}
+.products{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:28px}
+.card,.panel{background:white;border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.card-body{padding:15px}
+.art{height:140px;display:grid;place-items:center;background:#e4e8df}
+.art svg{height:112px;width:100px}
+.card:nth-child(2) .art{background:#eee1dc}
+.card:nth-child(3) .art{background:#e0e4ed}
+.card p{font-size:12px;margin:7px 0}
+.card button{padding:7px 10px;font-size:12px;width:100%}
+.benefit{margin-top:24px;padding:22px;border-left:3px solid #bba477;background:#eeece4}
+.chat{box-shadow:0 18px 45px #20382a10}
+.chat-head{padding:18px 20px;background:var(--green);color:white;display:flex;justify-content:space-between;align-items:center}
+.chat-head small{display:block;font-size:11px;opacity:.8}
+.chat-head button{font-size:12px;padding:5px 9px}
+.messages{height:390px;overflow:auto;padding:20px;background:#fbfbf8;display:flex;flex-direction:column;gap:14px}
+.bubble{padding:12px 15px;border-radius:13px;white-space:pre-wrap;overflow-wrap:anywhere;max-width:94%;font-size:14px}
+.bot{background:#eeeee7;align-self:flex-start}
+.user{background:#e0eee7;align-self:flex-end}
+.actions{padding:12px;display:flex;gap:7px;flex-wrap:wrap;border-top:1px solid var(--line)}
+.actions button{padding:7px 10px;font-size:12px}
+.composer{display:flex;gap:8px;padding:12px;border-top:1px solid var(--line)}
+.composer input{width:100%;min-width:0;border:1px solid var(--line);border-radius:9px;padding:10px}
+.filebar{padding:0 14px 12px;font-size:12px}
+.filebar input{width:100%;font-size:12px}
+.footer-note{padding:0 16px 14px;font-size:11px;color:var(--muted)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:20px 0}
+.stat{padding:22px}
+.stat strong{display:block;font-size:29px;font-weight:500;margin-top:7px}
+.admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.section{padding:24px;margin-bottom:20px}
+.settings{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+label{display:block;font-size:12px;color:var(--muted)}
+label input{width:100%;padding:9px;margin-top:5px;border:1px solid var(--line);border-radius:7px}
+.big{font-size:32px;color:var(--green)}
+.entry{padding:13px 0;border-bottom:1px solid var(--line);white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px}
+.entry:last-child{border-bottom:0}
+.scroll{max-height:370px;overflow:auto}
+.hidden,[hidden]{display:none!important}
+.admin-top{display:flex;justify-content:space-between;gap:15px;align-items:center;flex-wrap:wrap}
+.tag{font-size:11px;border-radius:20px;padding:4px 10px;background:#ece8da}
+@media(max-width:980px){.layout{grid-template-columns:1fr}.chat{max-width:650px;width:100%;margin:auto}.products{max-width:700px}.admin-grid{grid-template-columns:1fr}}
+@media(max-width:580px){main{padding:24px 14px}.products{grid-template-columns:1fr}.card{display:grid;grid-template-columns:100px 1fr}.art{height:100%;min-height:150px}.art svg{width:80px}.stats{grid-template-columns:1fr 1fr}.settings{grid-template-columns:1fr}.messages{height:360px}.brand{font-size:24px}}
+</style>
+</head>
+<body>
+<header>
+<div class="brand">Istyle<small>INFORMATION CENTER</small></div>
+<nav aria-label="画面切替">
+<button id="customerTab" aria-pressed="true">お客様向け体験</button>
+<button id="adminTab" aria-pressed="false">社長向け管理画面</button>
+</nav>
+</header>
+<div class="notice">
+提案用デモ｜商品・価格・納期・実績はすべて架空です。回答は登録済みシナリオによる模擬動作です。実際の注文・送信・決済は行いません。
+</div>
+
+<main>
+<section id="customer">
+<div class="layout">
+<div>
+<div class="eyebrow">COSTUME ATELIER / DEMONSTRATION</div>
+<h1>あなたの「なりたい」を、<br>一着の衣装に。</h1>
+<p class="muted">コスプレ衣装のご相談からオーダーのお見積もりまで。<br>
+インフォメーションセンターが、ご希望を順番にお伺いします。</p>
+<div class="products" id="products"></div>
+<div class="benefit">
+<h3>社長への説明は、この3ステップで。</h3>
+<div>① 商品について質問する</div>
+<div>② 見積もりを依頼して模擬受付する</div>
+<div>③ 管理画面で受付内容と効果を見る</div>
+</div>
+<p class="muted" style="margin-top:15px">入力には架空の情報をお使いください。履歴はこのページを開いている間だけ保持し、再読み込みすると消えます。</p>
+</div>
+
+<div class="panel chat">
+<div class="chat-head">
+<div><strong>インフォメーションセンター</strong><small>Istyle / シナリオ体験デモ</small></div>
+<button id="restart">新しい会話</button>
+</div>
+<div class="messages" id="messages" role="log" aria-live="polite"></div>
+<div class="actions" id="actions"></div>
+<div class="filebar" id="filebar" hidden>
+<label>参考画像を選択（任意・外部送信なし）<input type="file" id="image" accept="image/*"></label>
+</div>
+<form class="composer" id="composer">
+<input id="text" maxlength="600" aria-label="メッセージ" placeholder="例：サイズについて教えてください" autocomplete="off">
+<button class="primary" type="submit">送信</button>
+</form>
+<div class="footer-note">登録情報にない内容は、担当者への確認をご案内します。</div>
+</div>
+</div>
+</section>
+
+<section id="admin" hidden>
+<div class="admin-top">
+<div><div class="eyebrow">MANAGEMENT / DEMONSTRATION</div><h1>対応の流れと効果を、見える形に。</h1></div>
+<button id="clear">体験データを消去</button>
+</div>
+<p class="muted">この管理画面は説明用です。本番では担当者専用のログインを設けます。</p>
+
+<div class="stats">
+<div class="panel stat">FAQ回答件数<strong id="faqCount">0件</strong></div>
+<div class="panel stat">見積もり受付<strong id="quoteCount">0件</strong></div>
+<div class="panel stat">担当者確認の案内<strong id="handoffCount">0件</strong></div>
+<div class="panel stat">推定削減時間<strong id="minutes">0分</strong></div>
+</div>
+
+<div class="panel section">
+<div class="admin-top"><h2>費用対効果の試算</h2><button id="sample">月次サンプルに切替</button></div>
+<p id="basis" class="muted"></p>
+<div class="settings">
+<label>FAQを人が回答する想定時間（分／件）<input id="time" type="number" min="0" max="120" step="0.5" value="5"></label>
+<label>担当者の時間単価（円／時）<input id="rate" type="number" min="0" max="100000" step="100" value="2400"></label>
+<label>月額運用費の仮定（円）<input id="cost" type="number" min="0" max="1000000" step="500" value="5000"></label>
+</div>
+<p style="margin-top:18px">人件費換算の削減額：<strong id="gross"></strong><br>
+運用費を差し引いた試算：<strong class="big" id="net"></strong></p>
+<p class="muted" id="formula"></p>
+<p class="muted">推計値です。FAQ回答分のみを対象とし、見積もり受付・担当者確認・手戻りは含めません。実際の削減効果と運用費は導入後に検証します。体験データの試算では、この体験件数を月間件数と仮定します。</p>
+</div>
+
+<div class="admin-grid">
+<div class="panel section"><h2>見積もり受付一覧</h2><div id="quotes" class="scroll"></div></div>
+<div class="panel section"><h2>対応履歴</h2><div id="logs" class="scroll"></div></div>
+</div>
+<div class="panel section">
+<h3>本番接続で実現すること</h3>
+<p class="muted">登録資料に基づくAI回答／担当者へのメール・チャット通知／履歴の継続保存／担当者が金額確定後に決済案内／多言語対応。これらの外部サービスは本デモに接続していません。</p>
+</div>
+</section>
+</main>
+
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const catalog=[
+{name:"クラシックメイド衣装",price:"参考 29,800円〜",detail:"ワンピース・エプロン・ヘッドドレスの3点。S〜XL、色変更は要相談。",lead:"仕様確定・入金確認後、約4〜6週間",color:"#43584f"},
+{name:"ステージアイドル衣装",price:"参考 39,800円〜",detail:"ジャケット・スカート・リボンの3点。S〜XL、チームでの色違い制作は要相談。",lead:"仕様確定・入金確認後、約5〜7週間",color:"#a86e70"},
+{name:"ファンタジー衣装",price:"参考 49,800円〜",detail:"マント・上衣・ボトムの3点。採寸情報をもとに相談。武器・靴は含みません。",lead:"仕様確定・入金確認後、約6〜8週間",color:"#6a7596"}
+];
+const fields=[
+{key:"design",q:"どのような衣装をご希望ですか？",choices:catalog.map(p=>p.name)},
+{key:"reference",q:"参考画像はありますか？画像を選択して「画像を選択しました」、または「画像なし」を押してください。画像の内容の解析や外部送信は行いません。",choices:["画像を選択しました","画像なし"]},
+{key:"size",q:"サイズや採寸情報を教えてください。",choices:["Mサイズ","Lサイズ","担当者と相談したい"]},
+{key:"quantity",q:"数量は何着ですか？1〜100着で入力してください。",choices:["1着","3着","10着"]},
+{key:"deadline",q:"希望納期を教えてください。受付時点では納期は確約されません。",choices:["2か月後を希望","3か月後を希望","担当者と相談したい"]},
+{key:"contact",q:"デモ用の連絡先を入力してください。実際の連絡先は不要です。",choices:["demo@example.com"]}
+];
+let mode="faq",step=0,values={},quotes=[],logs=[],faqCount=0,handoffCount=0,useSample=false,serial=1;
+const yen=n=>new Intl.NumberFormat("ja-JP",{style:"currency",currency:"JPY",maximumFractionDigits:0}).format(n);
+const stamp=()=>new Date().toLocaleTimeString("ja-JP",{hour:"2-digit",minute:"2-digit"});
+function log(who,text){logs.push({who,text,time:stamp()});renderAdmin()}
+function bubble(who,text){
+ const el=document.createElement("div");
+ el.className="bubble "+(who==="お客様"?"user":"bot");
+ el.textContent=text;$("messages").append(el);
+ $("messages").scrollTop=$("messages").scrollHeight;log(who,text);
+}
+function bot(text){bubble("センター",text)}
+function actions(items){
+ $("actions").replaceChildren();
+ items.forEach(([label,fn])=>{
+ const b=document.createElement("button");b.type="button";b.textContent=label;
+ b.addEventListener("click",fn);$("actions").append(b);
+ });
+}
+function menu(){
+ actions(["商品を紹介して","サイズについて","納期について","見積もりを依頼したい"].map(t=>[t,()=>send(t)]));
+}
+function start(){
+ mode="faq";step=0;values={};$("image").value="";$("filebar").hidden=true;
+ $("messages").replaceChildren();
+ bot("私はIstyleインフォメーションセンターです。商品のご紹介やお見積もりのご相談を承ります。\n\nこちらは架空商品を使った体験デモです。商品案内、サイズ、納期についてお聞きいただけます。");
+ menu();
+}
+function ask(){
+ $("filebar").hidden=step!==1;
+ bot("見積もり相談 "+(step+1)+"/"+fields.length+"\n"+fields[step].q);
+ actions([...fields[step].choices.map(t=>[t,()=>send(t)]),["受付を中止",cancel]]);
+}
+function cancel(){
+ mode="faq";$("filebar").hidden=true;
+ bot("見積もりの入力を中止しました。受付は行っていません。");menu();
+}
+function beginQuote(){
+ mode="quote";step=0;values={};$("image").value="";ask();
+}
+function summary(){
+ mode="review";$("filebar").hidden=true;
+ bot("受付前に内容をご確認ください。\n\n"+summaryText(values)+"\n\n金額・仕様・納期は担当者確認後に確定します。下のボタンで模擬受付を完了できます。");
+ actions([["この内容で模擬受付",finish],["最初から修正",beginQuote],["中止",cancel]]);
+}
+function summaryText(v){
+ return ["希望衣装："+v.design,"参考画像："+v.reference,"サイズ："+v.size,"数量："+v.quantity+"着","希望納期："+v.deadline,"連絡先："+v.contact].join("\n");
+}
+function finish(){
+ if(mode!=="review")return;
+ const id="DEMO-"+String(serial++).padStart(3,"0");
+ quotes.push({id,time:stamp(),...values});
+ mode="faq";
+ bot("模擬受付が完了しました。\n受付番号："+id+"\n\n社長向け管理画面で受付内容をご覧いただけます。\n実際のメール送信・注文・決済は行っていません。");
+ menu();renderAdmin();
+}
+function answer(t){
+ let result="";
+ if(/見積|見積り|オーダー|注文|相談したい/.test(t)){beginQuote();return}
+ const item=catalog.find(p=>t.includes(p.name)||t.includes(p.name.replace("衣装","")));
+ if(item)result=item.name+"\n"+item.price+"\n"+item.detail+"\n制作目安："+item.lead+"\n\n架空の参考情報です。正式な金額は仕様確認後にお見積もりします。";
+ else if(/商品|紹介|おすすめ|何が|どんな/.test(t))result=catalog.map(p=>p.name+"："+p.price).join("\n")+"\n\nすべて架空の商品です。気になる商品名を入力して詳細をご覧ください。";
+ else if(/サイズ|採寸|寸法/.test(t))result="【デモ用FAQ】\nメイド・アイドル衣装はS〜XLを想定しています。ファンタジー衣装や個別調整は採寸情報をもとに担当者へ相談する設定です。サイズ適合は担当者確認後に判断します。";
+ else if(/納期|いつ|期間|急ぎ/.test(t))result="【デモ用FAQ】\n制作の参考目安は、メイド：約4〜6週間、アイドル：約5〜7週間、ファンタジー：約6〜8週間です。\n仕様確定・入金確認後からの目安で、希望納期への対応は担当者が確認します。";
+ else if(/価格|料金|値段|いくら|金額/.test(t))result="【デモ用参考価格】\n"+catalog.map(p=>p.name+"："+p.price).join("\n")+"\n\n送料等を含む正式な支払額は担当者確認後に確定します。";
+ else{
+  handoffCount++;
+  bot("その内容は登録済みのデモ資料にありません。担当者への確認が必要です。\nこのデモでは実際の担当者通知は行いません。\n\n商品案内・サイズ・納期の質問、見積もり受付を体験できます。");
+  menu();return;
+ }
+ faqCount++;bot(result);menu();renderAdmin();
+}
+function send(raw){
+ const t=String(raw).trim();if(!t)return;
+ $("text").value="";bubble("お客様",t);
+ if(mode==="review"){bot("受付内容を確認し、「この内容で模擬受付」または「最初から修正」を選んでください。");return}
+ if(mode!=="quote"){answer(t);return}
+ const key=fields[step].key;
+ if(key==="reference"){
+  if(t==="画像を選択しました"){
+   const file=$("image").files[0];
+   if(!file){bot("先に画像を選択するか、「画像なし」を押してください。");return}
+   if(!file.type.startsWith("image/")){bot("画像ファイルを選択してください。");return}
+   values[key]=file.name+"（未送信・内容未解析）";
+  }else if(t==="画像なし"){values[key]="画像なし"}
+  else{bot("「画像を選択しました」または「画像なし」を選んでください。");return}
+ }else if(key==="quantity"){
+  const normalized=t.normalize("NFKC");
+  const match=normalized.match(/^(\d{1,3})\s*(着|点)?$/);
+  if(!match||Number(match[1])<1||Number(match[1])>100){bot("数量は1〜100着で入力してください。");return}
+  values[key]=Number(match[1]);
+ }else if(key==="contact"){
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(t)){bot("メールアドレス形式で入力してください。デモ用の demo@example.com が使えます。");return}
+  values[key]=t;
+ }else values[key]=t;
+ step++;if(step<fields.length)ask();else summary();
+}
+function renderList(id,items,empty){
+ const root=$(id);root.replaceChildren();
+ if(!items.length){const p=document.createElement("p");p.className="muted";p.textContent=empty;root.append(p);return}
+ items.forEach(text=>{const d=document.createElement("div");d.className="entry";d.textContent=text;root.append(d)});
+}
+function number(id,max){
+ const v=Number($(id).value);return Number.isFinite(v)?Math.max(0,Math.min(max,v)):0;
+}
+function renderAdmin(){
+ $("faqCount").textContent=faqCount+"件";$("quoteCount").textContent=quotes.length+"件";
+ $("handoffCount").textContent=handoffCount+"件";
+ const time=number("time",120),rate=number("rate",100000),cost=number("cost",1000000);
+ $("minutes").textContent=(Math.round(faqCount*time*10)/10)+"分";
+ const count=useSample?120:faqCount;
+ const gross=count*time/60*rate;
+ $("basis").textContent=useSample
+ ?"月次サンプル：FAQ自動回答120件を仮定した試算です。体験履歴とは別の架空データです。"
+ :"体験件数で試算：現在のFAQ回答"+faqCount+"件を、月間の自動回答件数と仮定しています。";
+ $("sample").textContent=useSample?"体験件数に戻す":"月次サンプルに切替";
+ $("gross").textContent=yen(gross);$("net").textContent=yen(gross-cost);
+ $("formula").textContent=count+"件 × "+time+"分 ÷ 60 × "+yen(rate)+"／時 − 運用費 "+yen(cost);
+ renderList("quotes",[...quotes].reverse().map(q=>q.id+" ｜ "+q.time+" ｜ 模擬受付\n"+summaryText(q)),"まだ受付はありません。お客様向け画面で見積もり受付を体験してください。");
+ renderList("logs",[...logs].reverse().map(l=>l.time+" ｜ "+l.who+"\n"+l.text),"履歴はありません。");
+}
+function view(admin){
+ $("customer").hidden=admin;$("admin").hidden=!admin;
+ $("customerTab").setAttribute("aria-pressed",String(!admin));
+ $("adminTab").setAttribute("aria-pressed",String(admin));
+ if(admin)renderAdmin();
+}
+catalog.forEach(p=>{
+ const card=document.createElement("article");card.className="card";
+ card.innerHTML='<div class="art"><svg viewBox="0 0 100 120" aria-hidden="true"><path d="M33 8 19 21 4 46 22 55 29 39 31 65 15 109Q50 121 85 109L69 65 71 39 78 55 96 46 81 21 67 8 59 20 41 20Z" fill="'+p.color+'"/><path d="M33 66H68M42 24V60M58 24V60" stroke="#ffffff88" stroke-width="3"/></svg></div><div class="card-body"></div>';
+ const body=card.lastElementChild;
+ const h=document.createElement("h3");h.textContent=p.name;
+ const price=document.createElement("p");price.textContent=p.price;
+ const note=document.createElement("p");note.className="muted";note.textContent="架空商品・イメージ図";
+ const b=document.createElement("button");b.textContent="チャットで詳しく";
+ b.onclick=()=>{
+  if(mode!=="faq"){bot("見積もり受付中です。商品詳細を見る場合は、先に受付を中止してください。");return}
+  send(p.name);$("messages").scrollIntoView({behavior:"smooth",block:"center"});
+ };
+ body.append(h,price,note,b);$("products").append(card);
+});
+$("customerTab").onclick=()=>view(false);
+$("adminTab").onclick=()=>view(true);
+$("restart").onclick=start;
+$("composer").onsubmit=e=>{e.preventDefault();send($("text").value)};
+$("sample").onclick=()=>{useSample=!useSample;renderAdmin()};
+["time","rate","cost"].forEach(id=>$(id).addEventListener("input",renderAdmin));
+$("clear").onclick=()=>{
+ quotes=[];logs=[];faqCount=0;handoffCount=0;useSample=false;
+ start();renderAdmin();
+};
+start();
+</script>
+</body>
+</html>
